@@ -1,6 +1,6 @@
 {
   "name": "gitea-action-trigger-workflow",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Gitea Action: trigger a workflow in another Gitea repository.",
   "private": true,
   "type": "commonjs",
