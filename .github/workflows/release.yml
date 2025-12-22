@@ -67,11 +67,40 @@ jobs:
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Generate release notes fallback
+        if: steps.release-notes.outcome == 'failure' || steps.release-notes.outcome == 'skipped' || steps.release-notes.outputs.changelog == '' || steps.release-notes.outputs.changelog == null
+        id: git-notes
+        run: |
+          CURRENT_TAG="${{ github.ref_name }}"
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            RANGE="HEAD"
+          else
+            RANGE="${PREVIOUS_TAG}..${CURRENT_TAG}"
+          fi
+          
+          {
+            echo "## What's Changed"
+            echo ""
+            git log ${RANGE} --pretty=format:"- %s (%h)" --no-merges | head -50
+            echo ""
+            if [ -n "$PREVIOUS_TAG" ]; then
+              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
+            fi
+          } > RELEASE_NOTES.md
+          
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.release-notes.outputs.changelog }}
+          body: ${{ steps.release-notes.outputs.changelog != '' && steps.release-notes.outputs.changelog || steps.git-notes.outputs.notes }}
+          body_path: ""
           generate_release_notes: false
 
       - name: Commit updated CHANGELOG.md
