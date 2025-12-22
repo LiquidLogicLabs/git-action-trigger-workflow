@@ -38,45 +38,40 @@ jobs:
         run: |
           npm run changelog:release || echo "" > CHANGELOG.md
 
-      - name: Generate release notes from commits
+      - name: Generate release notes
         id: release-notes
-        run: |
-          CURRENT_TAG="${{ github.ref_name }}"
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
-          
-          if [ -z "$PREVIOUS_TAG" ]; then
-            RANGE="HEAD"
-          else
-            RANGE="${PREVIOUS_TAG}..${CURRENT_TAG}"
-          fi
-          
-          # Generate formatted release notes from commits
-          {
-            echo "## What's Changed"
-            echo ""
-            git log ${RANGE} --pretty=format:"- %s (%h)" --no-merges | \
-              sed 's/^feat: /🚀 **Feature:** /' | \
-              sed 's/^fix: /🐛 **Fix:** /' | \
-              sed 's/^docs: /📝 **Docs:** /' | \
-              sed 's/^chore: /🔧 **Chore:** /' | \
-              sed 's/^refactor: /♻️ **Refactor:** /' | \
-              sed 's/^test: /✅ **Test:** /' | \
-              sed 's/^perf: /⚡ **Performance:** /' | \
-              sed 's/^style: /💄 **Style:** /'
-            echo ""
-            if [ -n "$PREVIOUS_TAG" ]; then
-              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
-            fi
-          } > RELEASE_NOTES.md
-          
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        uses: release-changelog-builder-action@v2
+        with:
+          configuration: |
+            {
+              "categories": [
+                {
+                  "title": "## 🚀 Features",
+                  "labels": ["enhancement", "feature"]
+                },
+                {
+                  "title": "## 🐛 Bug Fixes",
+                  "labels": ["bug", "fix"]
+                },
+                {
+                  "title": "## 📝 Documentation",
+                  "labels": ["documentation", "docs"]
+                },
+                {
+                  "title": "## 🔧 Maintenance",
+                  "labels": ["chore", "refactor", "maintenance"]
+                }
+              ],
+              "ignore_labels": ["ignore-for-release"],
+              "sort": "ASC"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: RELEASE_NOTES.md
+          body: ${{ steps.release-notes.outputs.changelog }}
           generate_release_notes: false
 
       - name: Commit updated CHANGELOG.md
