@@ -38,7 +38,27 @@ jobs:
       - name: Generate changelog notes for release
         id: changelog
         run: |
-          npm run changelog:notes > RELEASE_NOTES.md || echo "" > RELEASE_NOTES.md
+          set -euo pipefail
+          CURRENT_TAG="${{ github.ref_name }}"
+          
+          # Get previous tag
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -1 || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # First release - generate from beginning
+            npx conventional-changelog -p conventionalcommits --release-count 1 > RELEASE_NOTES.md || echo "" > RELEASE_NOTES.md
+          else
+            # Generate notes between previous tag and current tag
+            npx conventional-changelog -p conventionalcommits --from "$PREVIOUS_TAG" --to "$CURRENT_TAG" > RELEASE_NOTES.md || echo "" > RELEASE_NOTES.md
+          fi
+          
+          # If still empty, fallback to git log
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "## Changes" > RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            git log ${PREVIOUS_TAG}..${CURRENT_TAG} --pretty=format:"- %s (%h)" >> RELEASE_NOTES.md || echo "No changes found" >> RELEASE_NOTES.md
+          fi
+          
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
