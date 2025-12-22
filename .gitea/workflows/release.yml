@@ -25,7 +25,11 @@ jobs:
           npm run build
           git diff --exit-code
 
-      - name: Generate changelog notes
+      - name: Update CHANGELOG.md
+        run: |
+          npm run changelog:release || echo "" > CHANGELOG.md
+
+      - name: Generate changelog notes for release
         run: |
           npm run changelog:notes > RELEASE_NOTES.md || echo "" > RELEASE_NOTES.md
 
@@ -74,6 +78,23 @@ jobs:
             cat /tmp/release.json >&2 || true
             exit 1
           fi
+
+      - name: Commit updated CHANGELOG.md
+        env:
+          TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          set -euo pipefail
+          BASE="${GITEA_SERVER_URL:-${GITHUB_SERVER_URL:-}}"
+          REPO="${GITEA_REPOSITORY:-${GITHUB_REPOSITORY:-}}"
+          HOST="$(echo "${BASE%/}" | sed -E 's#^https?://##')"
+          
+          git config user.name "gitea-actions[bot]"
+          git config user.email "gitea-actions[bot]@users.noreply.gitea.io"
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md for ${GITEA_REF_NAME:-${GITHUB_REF_NAME:-}}" || exit 0
+          
+          git remote set-url origin "https://oauth2:${TOKEN}@${HOST}/${REPO}.git"
+          git push origin HEAD:main || exit 0
 
       - name: Move floating tags (v1, v1.2)
         env:

@@ -31,7 +31,11 @@ jobs:
           npm run build
           git diff --exit-code
 
-      - name: Generate changelog notes
+      - name: Update CHANGELOG.md
+        run: |
+          npm run changelog:release || echo "" > CHANGELOG.md
+
+      - name: Generate changelog notes for release
         id: changelog
         run: |
           npm run changelog:notes > RELEASE_NOTES.md || echo "" > RELEASE_NOTES.md
@@ -44,6 +48,16 @@ jobs:
         with:
           body_path: RELEASE_NOTES.md
           generate_release_notes: false
+
+      - name: Commit updated CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md for ${{ github.ref_name }}" || exit 0
+          git push origin HEAD:main || exit 0
 
       - name: Move floating tags (v1, v1.2)
         env:
