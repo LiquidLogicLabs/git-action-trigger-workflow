@@ -23,6 +23,7 @@ pnpm-debug.log*
 .cursor/
 !.cursor/rules/
 !.cursor/rules/*.mdc
+.github/chatmodes/
 *.swp
 *.swo
 *~
