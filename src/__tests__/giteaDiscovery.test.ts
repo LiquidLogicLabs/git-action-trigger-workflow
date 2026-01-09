@@ -1,5 +1,6 @@
 import { dispatchWorkflow, findWorkflowByName, listWorkflows, WorkflowLike } from '../gitea';
 import type { HttpClient } from '../http';
+import { Logger } from '../logger';
 
 function fakeHttp(responses: Record<string, { status: number; data?: unknown; text?: string }>): HttpClient {
   return {
@@ -10,12 +11,7 @@ function fakeHttp(responses: Record<string, { status: number; data?: unknown; te
   };
 }
 
-const logger = {
-  info: () => undefined,
-  warn: () => undefined,
-  error: () => undefined,
-  debug: () => undefined,
-};
+const logger = new Logger(false);
 
 describe('gitea workflow discovery/dispatch', () => {
   test('listWorkflows tries candidates until one works', async () => {

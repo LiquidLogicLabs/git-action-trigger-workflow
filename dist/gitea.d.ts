@@ -1,5 +1,5 @@
 import { HttpClient } from './http';
-import { Logger } from './log';
+import { Logger } from './logger';
 export type WorkflowLike = {
     id?: number;
     name: string;

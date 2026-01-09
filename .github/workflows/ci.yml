@@ -2,9 +2,14 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: ['**']  # Only match branches (tags are handled by release workflow)
   pull_request:
     branches: ['**']
+  workflow_call:  # Allow CI to be called by release workflow
+  workflow_dispatch:  # Allow manual triggering
+
+# Note: When called by release workflow, CI will run on the tag ref
+# When triggered directly, CI should NOT run on tag pushes (release handles those)
 
 permissions:
   contents: read
@@ -12,6 +17,7 @@ permissions:
 
 jobs:
   lint:
+    if: github.event_name != 'push' || github.ref_type != 'tag'  # Skip on tag pushes
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,6 +39,8 @@ jobs:
         run: npx tsc --noEmit
 
   test:
+    if: github.event_name != 'push' || github.ref_type != 'tag'  # Skip on tag pushes
+    needs: lint  # Tests run after lint
     uses: ./.github/workflows/test.yml
 
 

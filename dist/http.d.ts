@@ -1,4 +1,4 @@
-import { Logger } from './log';
+import { Logger } from './logger';
 export type HttpClient = {
     getJson: <T>(path: string) => Promise<{
         status: number;

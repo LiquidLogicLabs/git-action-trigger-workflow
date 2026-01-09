@@ -2,11 +2,11 @@ import * as core from '@actions/core';
 import { readConfig } from './config';
 import { createHttpClient } from './http';
 import { dispatchWorkflow, findWorkflowByName, listWorkflows } from './gitea';
-import { createLogger } from './log';
+import { Logger } from './logger';
 
 async function run(): Promise<void> {
   const cfg = readConfig();
-  const log = createLogger(cfg.verbose);
+  const log = new Logger(cfg.verbose);
 
   // Mask token in logs
   core.setSecret(cfg.token);

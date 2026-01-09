@@ -33,41 +33,61 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Logger = void 0;
+exports.createLogger = createLogger;
 const core = __importStar(require("@actions/core"));
-const config_1 = require("./config");
-const http_1 = require("./http");
-const gitea_1 = require("./gitea");
-const logger_1 = require("./logger");
-async function run() {
-    const cfg = (0, config_1.readConfig)();
-    const log = new logger_1.Logger(cfg.verbose);
-    // Mask token in logs
-    core.setSecret(cfg.token);
-    log.info(`Triggering workflow '${cfg.workflowName}' in ${cfg.baseUrl}/${cfg.owner}/${cfg.repo} on ref '${cfg.ref}'`);
-    log.debug(`inputs keys: ${Object.keys(cfg.inputs).join(', ') || '(none)'}`);
-    const http = (0, http_1.createHttpClient)({ baseUrl: cfg.baseUrl, token: cfg.token, logger: log, verbose: cfg.verbose });
-    const { workflows } = await (0, gitea_1.listWorkflows)({
-        http,
-        logger: log,
-        owner: cfg.owner,
-        repo: cfg.repo,
-        verbose: cfg.verbose,
-    });
-    const wf = (0, gitea_1.findWorkflowByName)(workflows, cfg.workflowName);
-    const result = await (0, gitea_1.dispatchWorkflow)({
-        http,
-        logger: log,
-        owner: cfg.owner,
-        repo: cfg.repo,
-        workflow: wf,
-        ref: cfg.ref,
-        inputs: cfg.inputs,
-        verbose: cfg.verbose,
-    });
-    log.info(`Dispatch request accepted (${result.status}).`);
+/**
+ * Logger utility with verbose/debug support
+ * Provides consistent logging across the action
+ */
+class Logger {
+    verbose;
+    constructor(verbose = false) {
+        this.verbose = verbose;
+    }
+    /**
+     * Log an info message
+     */
+    info(message) {
+        core.info(message);
+    }
+    /**
+     * Log a warning message
+     */
+    warning(message) {
+        core.warning(message);
+    }
+    /**
+     * Log an error message
+     */
+    error(message) {
+        core.error(message);
+    }
+    /**
+     * Log a debug message - uses core.info() when verbose is true so it always shows
+     * Falls back to core.debug() when verbose is false (for when ACTIONS_STEP_DEBUG is set at workflow level)
+     */
+    debug(message) {
+        if (this.verbose) {
+            core.info(`[DEBUG] ${message}`);
+        }
+        else {
+            core.debug(message);
+        }
+    }
 }
-run().catch((err) => {
-    const msg = err instanceof Error ? err.message : String(err);
-    core.setFailed(msg);
-});
-//# sourceMappingURL=main.js.map
+exports.Logger = Logger;
+/**
+ * @deprecated Use `new Logger(verbose)` instead
+ * Kept for backward compatibility
+ */
+function createLogger(verbose) {
+    const logger = new Logger(verbose);
+    return {
+        info: (msg) => logger.info(msg),
+        warn: (msg) => logger.warning(msg),
+        error: (msg) => logger.error(msg),
+        debug: (msg) => logger.debug(msg),
+    };
+}
+//# sourceMappingURL=logger.js.map

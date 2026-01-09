@@ -25976,7 +25976,7 @@ function createHttpClient(opts) {
 
 /***/ }),
 
-/***/ 5625:
+/***/ 6999:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -26015,17 +26015,61 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Logger = void 0;
 exports.createLogger = createLogger;
 const core = __importStar(__nccwpck_require__(7484));
+/**
+ * Logger utility with verbose/debug support
+ * Provides consistent logging across the action
+ */
+class Logger {
+    verbose;
+    constructor(verbose = false) {
+        this.verbose = verbose;
+    }
+    /**
+     * Log an info message
+     */
+    info(message) {
+        core.info(message);
+    }
+    /**
+     * Log a warning message
+     */
+    warning(message) {
+        core.warning(message);
+    }
+    /**
+     * Log an error message
+     */
+    error(message) {
+        core.error(message);
+    }
+    /**
+     * Log a debug message - uses core.info() when verbose is true so it always shows
+     * Falls back to core.debug() when verbose is false (for when ACTIONS_STEP_DEBUG is set at workflow level)
+     */
+    debug(message) {
+        if (this.verbose) {
+            core.info(`[DEBUG] ${message}`);
+        }
+        else {
+            core.debug(message);
+        }
+    }
+}
+exports.Logger = Logger;
+/**
+ * @deprecated Use `new Logger(verbose)` instead
+ * Kept for backward compatibility
+ */
 function createLogger(verbose) {
+    const logger = new Logger(verbose);
     return {
-        info: (msg) => core.info(msg),
-        warn: (msg) => core.warning(msg),
-        error: (msg) => core.error(msg),
-        debug: (msg) => {
-            if (verbose)
-                core.info(`[debug] ${msg}`);
-        },
+        info: (msg) => logger.info(msg),
+        warn: (msg) => logger.warning(msg),
+        error: (msg) => logger.error(msg),
+        debug: (msg) => logger.debug(msg),
     };
 }
 
@@ -26075,10 +26119,10 @@ const core = __importStar(__nccwpck_require__(7484));
 const config_1 = __nccwpck_require__(2973);
 const http_1 = __nccwpck_require__(6803);
 const gitea_1 = __nccwpck_require__(9549);
-const log_1 = __nccwpck_require__(5625);
+const logger_1 = __nccwpck_require__(6999);
 async function run() {
     const cfg = (0, config_1.readConfig)();
-    const log = (0, log_1.createLogger)(cfg.verbose);
+    const log = new logger_1.Logger(cfg.verbose);
     // Mask token in logs
     core.setSecret(cfg.token);
     log.info(`Triggering workflow '${cfg.workflowName}' in ${cfg.baseUrl}/${cfg.owner}/${cfg.repo} on ref '${cfg.ref}'`);
