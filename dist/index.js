@@ -25719,8 +25719,17 @@ function normalizeOrigin(baseUrl) {
 }
 function detectPlatform(baseUrl, repoUrlHost) {
     const host = (baseUrl && new URL(baseUrl).host) || repoUrlHost || '';
+    // If we have a host from the URL, use it to determine platform (highest priority)
+    if (host) {
+        if (host.includes('github.') || host === 'github.com') {
+            return 'github';
+        }
+        // Any other host is assumed to be Gitea
+        return 'gitea';
+    }
+    // Fallback to environment variables only if no URL host is available
     const hasGithubEnv = !!getEnvAny(['GITHUB_SERVER_URL', 'GITHUB_REPOSITORY', 'GITHUB_API_URL', 'GITHUB_ACTIONS']);
-    if (host.includes('github.') || host === 'github.com' || hasGithubEnv) {
+    if (hasGithubEnv) {
         return 'github';
     }
     return 'gitea';
