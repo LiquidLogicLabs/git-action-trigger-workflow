@@ -6,7 +6,7 @@ import { createPlatformClient } from './platforms';
 import { findWorkflowByName } from './utils/workflows';
 
 async function run(): Promise<void> {
-  const cfg = readConfig();
+  const cfg = await readConfig();
   const log = new Logger(cfg.verbose);
 
   core.setSecret(cfg.token);

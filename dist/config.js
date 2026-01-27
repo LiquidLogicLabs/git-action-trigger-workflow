@@ -37,6 +37,7 @@ exports.__internal = void 0;
 exports.parseRepoTarget = parseRepoTarget;
 exports.readConfig = readConfig;
 const core = __importStar(require("@actions/core"));
+const git_platform_detector_1 = require("git-platform-detector");
 function parseBool(v, defaultValue) {
     if (v == null || v === '')
         return defaultValue;
@@ -68,22 +69,28 @@ function normalizeOrigin(baseUrl) {
     const u = new URL(baseUrl);
     return u.origin;
 }
-function detectPlatform(baseUrl, repoUrlHost) {
-    const host = (baseUrl && new URL(baseUrl).host) || repoUrlHost || '';
-    // If we have a host from the URL, use it to determine platform (highest priority)
-    if (host) {
-        if (host.includes('github.') || host === 'github.com') {
-            return 'github';
-        }
-        // Any other host is assumed to be Gitea
+async function detectPlatform(baseUrl, repoUrlHost) {
+    const candidateUrls = [];
+    if (baseUrl) {
+        candidateUrls.push(baseUrl);
+    }
+    if (repoUrlHost) {
+        candidateUrls.push(`https://${repoUrlHost}`);
+    }
+    const result = await (0, git_platform_detector_1.detectPlatform)({
+        providers: (0, git_platform_detector_1.getBuiltInProviders)(),
+        extraUrls: candidateUrls,
+        env: process.env
+    });
+    if (result.providerId === 'gitea') {
         return 'gitea';
     }
-    // Fallback to environment variables only if no URL host is available
-    const hasGithubEnv = !!getEnvAny(['GITHUB_SERVER_URL', 'GITHUB_REPOSITORY', 'GITHUB_API_URL', 'GITHUB_ACTIONS']);
-    if (hasGithubEnv) {
+    if (result.providerId === 'github') {
         return 'github';
     }
-    return 'gitea';
+    // Fallback to previous behavior when detection is generic/unknown
+    const hasGithubEnv = !!getEnvAny(['GITHUB_SERVER_URL', 'GITHUB_REPOSITORY', 'GITHUB_API_URL', 'GITHUB_ACTIONS']);
+    return hasGithubEnv ? 'github' : 'gitea';
 }
 function computeApiBase(platform, baseUrl) {
     if (platform === 'github') {
@@ -111,7 +118,7 @@ function parseInputs(inputsRaw) {
         throw new Error(`Invalid 'inputs' JSON: ${msg}`);
     }
 }
-function readConfig() {
+async function readConfig() {
     const repoInput = core.getInput('repo')?.trim();
     const workflowName = core.getInput('workflow_name', { required: true }).trim();
     const refInput = (core.getInput('ref') || '').trim();
@@ -134,7 +141,7 @@ function readConfig() {
         (() => {
             throw new Error(`Missing base URL. Provide input 'base_url', use a URL in 'repo', or ensure env GITEA_SERVER_URL/GITHUB_SERVER_URL is set.`);
         })();
-    const platform = detectPlatform(baseUrl, target.baseUrl ? new URL(baseUrl).host : undefined);
+    const platform = await detectPlatform(baseUrl, target.baseUrl ? new URL(baseUrl).host : undefined);
     const apiBaseUrl = computeApiBase(platform, baseUrl);
     const token = tokenInput ||
         envToken ||

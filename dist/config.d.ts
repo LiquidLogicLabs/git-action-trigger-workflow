@@ -18,9 +18,9 @@ export type ActionConfig = {
 };
 export declare function parseRepoTarget(repoInput: string): RepoTarget;
 declare function normalizeOrigin(baseUrl: string): string;
-declare function detectPlatform(baseUrl: string | undefined, repoUrlHost: string | undefined): PlatformId;
+declare function detectPlatform(baseUrl: string | undefined, repoUrlHost: string | undefined): Promise<PlatformId>;
 declare function computeApiBase(platform: PlatformId, baseUrl: string): string;
-export declare function readConfig(): ActionConfig;
+export declare function readConfig(): Promise<ActionConfig>;
 export declare const __internal: {
     detectPlatform: typeof detectPlatform;
     computeApiBase: typeof computeApiBase;

@@ -25,12 +25,12 @@ describe('parseRepoTarget', () => {
 describe('platform detection + api base', () => {
   const { detectPlatform, computeApiBase, normalizeOrigin } = __internal;
 
-  test('detects github by host', () => {
-    expect(detectPlatform('https://github.com', undefined)).toBe('github');
+  test('detects github by host', async () => {
+    await expect(detectPlatform('https://github.com', undefined)).resolves.toBe('github');
   });
 
-  test('detects gitea by default', () => {
-    expect(detectPlatform('https://gitea.example.com', undefined)).toBe('gitea');
+  test('detects gitea by default', async () => {
+    await expect(detectPlatform('https://gitea.example.com', undefined)).resolves.toBe('gitea');
   });
 
   test('computes github api base for dotcom', () => {

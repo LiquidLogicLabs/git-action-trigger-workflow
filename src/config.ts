@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { PlatformId } from './platforms/types';
+import { detectPlatform as detectSharedPlatform, getBuiltInProviders } from 'git-platform-detector';
 
 export type RepoTarget = {
   owner: string;
@@ -53,24 +54,31 @@ function normalizeOrigin(baseUrl: string): string {
   return u.origin;
 }
 
-function detectPlatform(baseUrl: string | undefined, repoUrlHost: string | undefined): PlatformId {
-  const host = (baseUrl && new URL(baseUrl).host) || repoUrlHost || '';
-  
-  // If we have a host from the URL, use it to determine platform (highest priority)
-  if (host) {
-    if (host.includes('github.') || host === 'github.com') {
-      return 'github';
-    }
-    // Any other host is assumed to be Gitea
+async function detectPlatform(baseUrl: string | undefined, repoUrlHost: string | undefined): Promise<PlatformId> {
+  const candidateUrls: string[] = [];
+  if (baseUrl) {
+    candidateUrls.push(baseUrl);
+  }
+  if (repoUrlHost) {
+    candidateUrls.push(`https://${repoUrlHost}`);
+  }
+
+  const result = await detectSharedPlatform({
+    providers: getBuiltInProviders(),
+    extraUrls: candidateUrls,
+    env: process.env
+  });
+
+  if (result.providerId === 'gitea') {
     return 'gitea';
   }
-  
-  // Fallback to environment variables only if no URL host is available
-  const hasGithubEnv = !!getEnvAny(['GITHUB_SERVER_URL', 'GITHUB_REPOSITORY', 'GITHUB_API_URL', 'GITHUB_ACTIONS']);
-  if (hasGithubEnv) {
+  if (result.providerId === 'github') {
     return 'github';
   }
-  return 'gitea';
+
+  // Fallback to previous behavior when detection is generic/unknown
+  const hasGithubEnv = !!getEnvAny(['GITHUB_SERVER_URL', 'GITHUB_REPOSITORY', 'GITHUB_API_URL', 'GITHUB_ACTIONS']);
+  return hasGithubEnv ? 'github' : 'gitea';
 }
 
 function computeApiBase(platform: PlatformId, baseUrl: string): string {
@@ -98,7 +106,7 @@ function parseInputs(inputsRaw?: string): Record<string, unknown> {
   }
 }
 
-export function readConfig(): ActionConfig {
+export async function readConfig(): Promise<ActionConfig> {
   const repoInput = core.getInput('repo')?.trim();
   const workflowName = core.getInput('workflow_name', { required: true }).trim();
   const refInput = (core.getInput('ref') || '').trim();
@@ -130,7 +138,7 @@ export function readConfig(): ActionConfig {
       );
     })();
 
-  const platform = detectPlatform(baseUrl, target.baseUrl ? new URL(baseUrl).host : undefined);
+  const platform = await detectPlatform(baseUrl, target.baseUrl ? new URL(baseUrl).host : undefined);
 
   const apiBaseUrl = computeApiBase(platform, baseUrl);
 
