@@ -24,6 +24,25 @@ describe('parseRepoTarget', () => {
 
 describe('platform detection + api base', () => {
   const { detectPlatform, computeApiBase, normalizeOrigin } = __internal;
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    // Clear GitHub environment variables that might interfere with detection
+    const cleanedEnv = { ...originalEnv };
+    delete cleanedEnv.GITHUB_SERVER_URL;
+    delete cleanedEnv.GITHUB_REPOSITORY;
+    delete cleanedEnv.GITHUB_API_URL;
+    delete cleanedEnv.GITHUB_ACTIONS;
+    delete cleanedEnv.GITHUB_TOKEN;
+    delete cleanedEnv.GITEA_SERVER_URL;
+    delete cleanedEnv.GITEA_REPOSITORY;
+    delete cleanedEnv.GITEA_TOKEN;
+    process.env = cleanedEnv;
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
 
   test('detects github by host', async () => {
     await expect(detectPlatform('https://github.com', undefined)).resolves.toBe('github');
