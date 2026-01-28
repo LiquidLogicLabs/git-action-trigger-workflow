@@ -25,6 +25,10 @@ on:
   workflow_call:  # Allow CI to be called by release workflow (always runs)
   workflow_dispatch:  # Allow manual triggering (always runs)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
@@ -68,6 +72,7 @@ jobs:
     # No conditions needed - workflow trigger handles filtering
     needs: lint  # Tests run after lint
     uses: ./.github/workflows/test.yml
+    secrets: inherit
     # test.yml runs: unit tests + integration tests (all tests except E2E)
     # Note: E2E tests run in release workflow, not CI
 
