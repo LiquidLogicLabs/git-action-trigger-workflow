@@ -1,4 +1,4 @@
-# git-action-trigger-workflow
+# Trigger remote workflow (GitHub/Gitea)
 
 [![GitHub release](https://img.shields.io/github/v/release/LiquidLogicLabs/gitea-action-trigger-workflow?sort=semver)](https://github.com/LiquidLogicLabs/gitea-action-trigger-workflow/releases)
 [![GitHub Marketplace](https://img.shields.io/badge/marketplace-gitea--action--trigger--workflow-blue?logo=github)](https://github.com/marketplace/actions/gitea-action-trigger-workflow)
