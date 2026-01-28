@@ -13,8 +13,8 @@ This document provides information for developers who want to contribute to this
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/LiquidLogicLabs/gitea-action-trigger-workflow.git
-cd gitea-action-trigger-workflow
+git clone https://github.com/LiquidLogicLabs/git-action-trigger-workflow.git
+cd git-action-trigger-workflow
 ```
 
 ### Install Dependencies

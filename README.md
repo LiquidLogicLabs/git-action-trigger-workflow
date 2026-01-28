@@ -1,7 +1,7 @@
 # Trigger remote workflow (GitHub/Gitea)
 
-[![GitHub release](https://img.shields.io/github/v/release/LiquidLogicLabs/gitea-action-trigger-workflow?sort=semver)](https://github.com/LiquidLogicLabs/gitea-action-trigger-workflow/releases)
-[![GitHub Marketplace](https://img.shields.io/badge/marketplace-gitea--action--trigger--workflow-blue?logo=github)](https://github.com/marketplace/actions/gitea-action-trigger-workflow)
+[![GitHub release](https://img.shields.io/github/v/release/LiquidLogicLabs/git-action-trigger-workflow?sort=semver)](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/releases)
+[![GitHub Marketplace](https://img.shields.io/badge/marketplace-git--action--trigger--workflow-blue?logo=github)](https://github.com/marketplace/actions/git-action-trigger-workflow)
 
 A GitHub Action that triggers a workflow in another repository hosted on **Gitea** or **GitHub** (self-hosted or cloud).
 
@@ -36,14 +36,12 @@ A GitHub Action that triggers a workflow in another repository hosted on **Gitea
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
 | `workflow_name` | ✅ Yes | - | The top-level `name:` field in the workflow YAML file (or filename if no name field exists) |
 | `repo` | ❌ No | Current repo | Target repository. Supports `owner/repo` or full URL (GitHub or Gitea) |
 | `ref` | ❌ No | `main` | Git ref to run the workflow on (branch/tag/SHA) |
 | `base_url` | ❌ No | Auto-inferred | Auto-detected from repo URL or runner env (`GITHUB_SERVER_URL` / `GITEA_SERVER_URL`); override when needed |
 | `token` | ❌ No | Runner token | API token (`GITHUB_TOKEN`/`GITEA_TOKEN` or explicit `token`) |
-| `inputs` | ❌ No | - | JSON object string of workflow inputs, e.g. `{\"env\":\"prod\",\"dry_run\":true}` |
+| `inputs` | ❌ No | - | JSON object string of workflow inputs, e.g. `{"env":"prod","dry_run":true}` |
 | `verbose` | ❌ No | `false` | Enable verbose logging for debugging |
 
 ### Understanding `workflow_name`
@@ -159,7 +157,7 @@ jobs:
       - name: Trigger GitHub workflow
         uses: LiquidLogicLabs/git-action-trigger-workflow@v1
         with:
-          repo: your-org/your-repo
+          repo: owner/repo
           workflow_name: CI
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -252,13 +250,13 @@ This action does not produce outputs. It triggers a workflow and reports success
 This action uses semantic versioning. It's recommended to pin to a major version:
 
 ```yaml
-uses: LiquidLogicLabs/gitea-action-trigger-workflow@v1  # Recommended
+uses: LiquidLogicLabs/git-action-trigger-workflow@v1  # Recommended
 ```
 
 Or pin to a specific version:
 
 ```yaml
-uses: LiquidLogicLabs/git-action-trigger-workflow@v0.1.2  # Specific version
+uses: LiquidLogicLabs/git-action-trigger-workflow@v1.2.3  # Specific version (pick a tag from Releases)
 ```
 
 ## Documentation
@@ -279,6 +277,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 📖 [Documentation](https://github.com/LiquidLogicLabs/gitea-action-trigger-workflow#readme)
-- 🐛 [Report Issues](https://github.com/LiquidLogicLabs/gitea-action-trigger-workflow/issues)
-- 💬 [Discussions](https://github.com/LiquidLogicLabs/gitea-action-trigger-workflow/discussions)
+- 📖 [Documentation](https://github.com/LiquidLogicLabs/git-action-trigger-workflow#readme)
+- 🐛 [Report Issues](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/issues)
+- 💬 [Discussions](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/discussions)

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-12-22
 
 ### Added
-- Initial release of gitea-action-trigger-workflow
+- Initial release of git-action-trigger-workflow (initially published as gitea-action-trigger-workflow)
 - Node-based action to trigger workflows in remote Gitea repositories
 - Support for workflow discovery by name
 - Configurable inputs: repo, workflow_name, ref, base_url, token, inputs, verbose
