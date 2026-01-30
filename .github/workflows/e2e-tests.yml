@@ -10,9 +10,16 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    # Run action from committed dist first (no build). Ensures E2E fails if dist is unbundled.
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Smoke test - action runs from committed dist
+        uses: ./
+        with:
+          workflow_name: 'CI'
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
