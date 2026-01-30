@@ -114,7 +114,10 @@ export async function readConfig(): Promise<ActionConfig> {
   const baseUrlInput = core.getInput('base_url')?.trim();
   const tokenInput = core.getInput('token')?.trim();
   const inputsRaw = core.getInput('inputs')?.trim();
-  const verbose = parseBool(core.getInput('verbose')?.trim(), false);
+  const verboseInput = parseBool(core.getInput('verbose')?.trim(), false);
+  const envStepDebug = (process.env.ACTIONS_STEP_DEBUG || '').toLowerCase();
+  const stepDebugEnabled = core.isDebug() || envStepDebug === 'true' || envStepDebug === '1';
+  const verbose = verboseInput || stepDebugEnabled;
 
   const envRepo = getEnvAny(['GITEA_REPOSITORY', 'GITHUB_REPOSITORY']);
   const envBaseUrl = getEnvAny(['GITEA_SERVER_URL', 'GITHUB_SERVER_URL']);
