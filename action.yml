@@ -40,7 +40,7 @@ inputs:
     description: Optional JSON object string of inputs for the workflow dispatch.
     required: false
   verbose:
-    description: Enable verbose logging (HTTP attempts, endpoint discovery, response snippets).
+    description: Enable verbose logging (HTTP attempts, endpoint discovery, response snippets). Also enabled when ACTIONS_STEP_DEBUG=true.
     required: false
     default: "false"
 
