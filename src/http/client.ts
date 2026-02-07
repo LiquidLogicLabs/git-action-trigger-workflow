@@ -1,3 +1,4 @@
+import { Agent } from 'undici';
 import { Logger } from '../logger';
 
 export type HttpClient = {
@@ -15,9 +16,13 @@ export function createHttpClient(opts: {
   token: string;
   logger: Logger;
   verbose: boolean;
+  skipCertificateCheck?: boolean;
   userAgent?: string;
 }): HttpClient {
-  const { baseUrl, token, logger, verbose, userAgent = 'git-action-trigger-workflow' } = opts;
+  const { baseUrl, token, logger, verbose, skipCertificateCheck, userAgent = 'git-action-trigger-workflow' } = opts;
+  const dispatcher = skipCertificateCheck
+    ? new Agent({ connect: { rejectUnauthorized: false } })
+    : undefined;
 
   async function request<T>(method: string, path: string, body?: unknown) {
     const url = new URL(path, baseUrl).toString();
@@ -33,7 +38,11 @@ export function createHttpClient(opts: {
     }
 
     if (verbose) logger.debug(`${method} ${url}`);
-    const res = await fetch(url, { method, headers, body: payload });
+    const requestOptions: RequestInit = { method, headers, body: payload };
+    if (dispatcher) {
+      (requestOptions as { dispatcher?: Agent }).dispatcher = dispatcher;
+    }
+    const res = await fetch(url, requestOptions);
     const status = res.status;
     const contentType = res.headers.get('content-type') || '';
     const text = await res.text();

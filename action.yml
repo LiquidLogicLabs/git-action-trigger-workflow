@@ -13,7 +13,7 @@ inputs:
       - https://github.com/owner/repo
       - https://gitea.example.com/owner/repo
     required: false
-  workflow_name:
+  workflowName:
     description: >
       Workflow name to dispatch. This is the top-level `name:` field in the workflow YAML file.
       If the workflow has no `name:` field, the filename (without extension) is used as fallback.
@@ -25,7 +25,7 @@ inputs:
     description: Git ref to run the workflow on (branch/tag/SHA).
     required: false
     default: main
-  base_url:
+  baseUrl:
     description: >
       Base URL for the target instance (GitHub or Gitea).
       Auto-inferred from repo URL or runner env (GITHUB_SERVER_URL / GITEA_SERVER_URL).
@@ -39,6 +39,10 @@ inputs:
   inputs:
     description: Optional JSON object string of inputs for the workflow dispatch.
     required: false
+  skipCertificateCheck:
+    description: Skip TLS certificate verification for API calls (self-hosted instances).
+    required: false
+    default: "false"
   verbose:
     description: Enable verbose logging (HTTP attempts, endpoint discovery, response snippets). Also enabled when ACTIONS_STEP_DEBUG=true.
     required: false

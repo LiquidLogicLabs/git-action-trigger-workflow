@@ -19,6 +19,7 @@ export type ActionConfig = {
   token: string;
   inputs: Record<string, unknown>;
   verbose: boolean;
+  skipCertificateCheck: boolean;
 };
 
 function parseBool(v: string | undefined, defaultValue: boolean): boolean {
@@ -108,13 +109,14 @@ function parseInputs(inputsRaw?: string): Record<string, unknown> {
 
 export async function readConfig(): Promise<ActionConfig> {
   const repoInput = core.getInput('repo')?.trim();
-  const workflowName = core.getInput('workflow_name', { required: true }).trim();
+  const workflowName = core.getInput('workflowName', { required: true }).trim();
   const refInput = (core.getInput('ref') || '').trim();
 
-  const baseUrlInput = core.getInput('base_url')?.trim();
+  const baseUrlInput = core.getInput('baseUrl')?.trim();
   const tokenInput = core.getInput('token')?.trim();
   const inputsRaw = core.getInput('inputs')?.trim();
   const verboseInput = parseBool(core.getInput('verbose')?.trim(), false);
+  const skipCertificateCheck = parseBool(core.getInput('skipCertificateCheck')?.trim(), false);
   const envStepDebug = (process.env.ACTIONS_STEP_DEBUG || '').toLowerCase();
   const stepDebugEnabled = core.isDebug() || envStepDebug === 'true' || envStepDebug === '1';
   const verbose = verboseInput || stepDebugEnabled;
@@ -165,6 +167,7 @@ export async function readConfig(): Promise<ActionConfig> {
     token,
     inputs: parsedInputs,
     verbose,
+    skipCertificateCheck,
   };
 }
 
