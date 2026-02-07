@@ -21,7 +21,7 @@ A GitHub Action that triggers a workflow in another repository hosted on **Gitea
 - name: Trigger remote workflow
   uses: LiquidLogicLabs/git-action-trigger-workflow@v1
   with:
-    workflow_name: Deploy
+    workflowName: Deploy
 ```
 
 ## Requirements
@@ -36,21 +36,22 @@ A GitHub Action that triggers a workflow in another repository hosted on **Gitea
 
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
-| `workflow_name` | ✅ Yes | - | The top-level `name:` field in the workflow YAML file (or filename if no name field exists) |
+| `workflowName` | ✅ Yes | - | The top-level `name:` field in the workflow YAML file (or filename if no name field exists) |
 | `repo` | ❌ No | Current repo | Target repository. Supports `owner/repo` or full URL (GitHub or Gitea) |
 | `ref` | ❌ No | `main` | Git ref to run the workflow on (branch/tag/SHA) |
-| `base_url` | ❌ No | Auto-inferred | Auto-detected from repo URL or runner env (`GITHUB_SERVER_URL` / `GITEA_SERVER_URL`); override when needed |
+| `baseUrl` | ❌ No | Auto-inferred | Auto-detected from repo URL or runner env (`GITHUB_SERVER_URL` / `GITEA_SERVER_URL`); override when needed |
 | `token` | ❌ No | Runner token | API token (`GITHUB_TOKEN`/`GITEA_TOKEN` or explicit `token`) |
 | `inputs` | ❌ No | - | JSON object string of workflow inputs, e.g. `{"env":"prod","dry_run":true}` |
+| `skipCertificateCheck` | ❌ No | `false` | Skip TLS certificate verification for API calls (self-hosted instances) |
 | `verbose` | ❌ No | `false` | Enable verbose logging for debugging |
 
-### Understanding `workflow_name`
+### Understanding `workflowName`
 
-The `workflow_name` refers to the **top-level `name:` field** in your workflow YAML file:
+The `workflowName` refers to the **top-level `name:` field** in your workflow YAML file:
 
 ```yaml
 # .gitea/workflows/deploy.yml
-name: Deploy to Production    # ← This is what you use for workflow_name
+name: Deploy to Production    # ← This is what you use for workflowName
 
 on:
   workflow_dispatch:
@@ -65,7 +66,7 @@ jobs:
         run: echo "building"
 ```
 
-To trigger this workflow, use: `workflow_name: Deploy to Production`
+To trigger this workflow, use: `workflowName: Deploy to Production`
 
 **If the workflow has no `name:` field**, the filename is used as fallback:
 ```yaml
@@ -78,7 +79,7 @@ jobs:
       - run: echo "building"
 ```
 
-To trigger this workflow, use: `workflow_name: build` (filename without extension)
+To trigger this workflow, use: `workflowName: build` (filename without extension)
 
 ## Usage Examples
 
@@ -97,7 +98,7 @@ jobs:
       - name: Trigger deploy workflow
         uses: LiquidLogicLabs/git-action-trigger-workflow@v1
         with:
-          workflow_name: Deploy
+          workflowName: Deploy
 ```
 
 ### Trigger a workflow in a different repo (same instance)
@@ -116,7 +117,7 @@ jobs:
         uses: LiquidLogicLabs/git-action-trigger-workflow@v1
         with:
           repo: other-owner/other-repo
-          workflow_name: Build
+          workflowName: Build
           ref: main
           inputs: '{"target":"staging","version":"1.0.0"}'
 ```
@@ -137,7 +138,7 @@ jobs:
         uses: LiquidLogicLabs/git-action-trigger-workflow@v1
         with:
           repo: https://gitea.other.example.com/other-owner/other-repo
-          workflow_name: Build
+          workflowName: Build
           token: ${{ secrets.OTHER_GITEA_TOKEN }}
           verbose: "true"
 ```
@@ -158,7 +159,7 @@ jobs:
         uses: LiquidLogicLabs/git-action-trigger-workflow@v1
         with:
           repo: owner/repo
-          workflow_name: CI
+          workflowName: CI
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -169,7 +170,7 @@ jobs:
 - name: Trigger workflow with inputs
   uses: LiquidLogicLabs/git-action-trigger-workflow@v1
   with:
-    workflow_name: Deploy
+    workflowName: Deploy
     inputs: |
       {
         "environment": "production",
@@ -233,7 +234,7 @@ The action sends the token as `Authorization: token <token>` in API requests.
 
 ### Workflow not found
 
-**Problem**: The specified `workflow_name` doesn't match any workflow.
+**Problem**: The specified `workflowName` doesn't match any workflow.
 
 **Solutions**:
 - Verify the workflow has a `name:` field or use the filename
