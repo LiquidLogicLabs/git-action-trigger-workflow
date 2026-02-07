@@ -9,6 +9,10 @@ async function run(): Promise<void> {
   const cfg = await readConfig();
   const log = new Logger(cfg.verbose);
 
+  if (cfg.skipCertificateCheck) {
+    log.warning('TLS certificate verification is disabled. This is a security risk and should only be used with trusted endpoints.');
+  }
+
   core.setSecret(cfg.token);
 
   log.info(
@@ -22,6 +26,7 @@ async function run(): Promise<void> {
     token: cfg.token,
     logger: log,
     verbose: cfg.verbose,
+    skipCertificateCheck: cfg.skipCertificateCheck,
     userAgent: 'git-action-trigger-workflow',
   });
 

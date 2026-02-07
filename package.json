@@ -43,7 +43,8 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "git-platform-detector": "https://git.ravenwolf.org/api/packages/liquidlogiclabs/npm/git-platform-detector/-/git-platform-detector-1.1.0.tgz"
+    "git-platform-detector": "https://git.ravenwolf.org/api/packages/liquidlogiclabs/npm/git-platform-detector/-/git-platform-detector-1.1.0.tgz",
+    "undici": "^6.21.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
