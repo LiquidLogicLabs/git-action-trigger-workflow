@@ -1,13 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createHttpClient = createHttpClient;
+const undici_1 = require("undici");
 function safeTruncate(s, max) {
     if (s.length <= max)
         return s;
     return `${s.slice(0, max)}…(truncated)`;
 }
 function createHttpClient(opts) {
-    const { baseUrl, token, logger, verbose, userAgent = 'git-action-trigger-workflow' } = opts;
+    const { baseUrl, token, logger, verbose, skipCertificateCheck, userAgent = 'git-action-trigger-workflow' } = opts;
+    const dispatcher = skipCertificateCheck
+        ? new undici_1.Agent({ connect: { rejectUnauthorized: false } })
+        : undefined;
     async function request(method, path, body) {
         const url = new URL(path, baseUrl).toString();
         const headers = {
@@ -22,7 +26,11 @@ function createHttpClient(opts) {
         }
         if (verbose)
             logger.debug(`${method} ${url}`);
-        const res = await fetch(url, { method, headers, body: payload });
+        const requestOptions = { method, headers, body: payload };
+        if (dispatcher) {
+            requestOptions.dispatcher = dispatcher;
+        }
+        const res = await fetch(url, requestOptions);
         const status = res.status;
         const contentType = res.headers.get('content-type') || '';
         const text = await res.text();

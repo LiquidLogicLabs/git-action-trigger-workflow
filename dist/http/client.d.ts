@@ -16,6 +16,7 @@ export declare function createHttpClient(opts: {
     token: string;
     logger: Logger;
     verbose: boolean;
+    skipCertificateCheck?: boolean;
     userAgent?: string;
 }): HttpClient;
 //# sourceMappingURL=client.d.ts.map

@@ -15,6 +15,7 @@ export type ActionConfig = {
     token: string;
     inputs: Record<string, unknown>;
     verbose: boolean;
+    skipCertificateCheck: boolean;
 };
 export declare function parseRepoTarget(repoInput: string): RepoTarget;
 declare function normalizeOrigin(baseUrl: string): string;
