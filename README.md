@@ -81,6 +81,10 @@ jobs:
 
 To trigger this workflow, use: `workflow-name: build` (filename without extension)
 
+## Permissions
+
+A token with permission to list and dispatch workflows is required (e.g. default `GITHUB_TOKEN` or `GITEA_TOKEN`). See [Authentication & Permissions](#authentication--permissions) for details.
+
 ## Usage Examples
 
 ### Basic: Trigger a workflow in the same repo
