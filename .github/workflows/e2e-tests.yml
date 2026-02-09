@@ -19,7 +19,7 @@ jobs:
       - name: Smoke test - action runs from committed dist
         uses: ./
         with:
-          workflowName: 'CI'
+          workflow-name: 'CI'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
