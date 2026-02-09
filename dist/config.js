@@ -120,13 +120,13 @@ function parseInputs(inputsRaw) {
 }
 async function readConfig() {
     const repoInput = core.getInput('repo')?.trim();
-    const workflowName = core.getInput('workflowName', { required: true }).trim();
+    const workflowName = core.getInput('workflow-name', { required: true }).trim();
     const refInput = (core.getInput('ref') || '').trim();
-    const baseUrlInput = core.getInput('baseUrl')?.trim();
+    const baseUrlInput = core.getInput('base-url')?.trim();
     const tokenInput = core.getInput('token')?.trim();
     const inputsRaw = core.getInput('inputs')?.trim();
     const verboseInput = parseBool(core.getInput('verbose')?.trim(), false);
-    const skipCertificateCheck = parseBool(core.getInput('skipCertificateCheck')?.trim(), false);
+    const skipCertificateCheck = parseBool(core.getInput('skip-certificate-check')?.trim(), false);
     const envStepDebug = (process.env.ACTIONS_STEP_DEBUG || '').toLowerCase();
     const stepDebugEnabled = core.isDebug() || envStepDebug === 'true' || envStepDebug === '1';
     const verbose = verboseInput || stepDebugEnabled;

@@ -53914,13 +53914,13 @@ function parseInputs(inputsRaw) {
 }
 async function readConfig() {
     const repoInput = core.getInput('repo')?.trim();
-    const workflowName = core.getInput('workflowName', { required: true }).trim();
+    const workflowName = core.getInput('workflow-name', { required: true }).trim();
     const refInput = (core.getInput('ref') || '').trim();
-    const baseUrlInput = core.getInput('baseUrl')?.trim();
+    const baseUrlInput = core.getInput('base-url')?.trim();
     const tokenInput = core.getInput('token')?.trim();
     const inputsRaw = core.getInput('inputs')?.trim();
     const verboseInput = parseBool(core.getInput('verbose')?.trim(), false);
-    const skipCertificateCheck = parseBool(core.getInput('skipCertificateCheck')?.trim(), false);
+    const skipCertificateCheck = parseBool(core.getInput('skip-certificate-check')?.trim(), false);
     const envStepDebug = (process.env.ACTIONS_STEP_DEBUG || '').toLowerCase();
     const stepDebugEnabled = core.isDebug() || envStepDebug === 'true' || envStepDebug === '1';
     const verbose = verboseInput || stepDebugEnabled;
@@ -54167,8 +54167,10 @@ const core = __importStar(__nccwpck_require__(7484));
  */
 class Logger {
     verbose;
-    constructor(verbose = false) {
-        this.verbose = verbose;
+    debugMode;
+    constructor(verbose = false, debugMode = false) {
+        this.verbose = verbose || debugMode;
+        this.debugMode = debugMode;
     }
     /**
      * Log an info message
@@ -54189,21 +54191,41 @@ class Logger {
         core.error(message);
     }
     /**
-     * Log a debug message - uses core.info() when verbose is true so it always shows
-     * Falls back to core.debug() when verbose is false (for when ACTIONS_STEP_DEBUG is set at workflow level)
+     * Log a verbose info message - only shown when verbose is true
+     */
+    verboseInfo(message) {
+        if (this.verbose) {
+            core.info(message);
+        }
+    }
+    /**
+     * Log a debug message - uses core.info() with [DEBUG] prefix when debugMode is true
+     * Falls back to core.debug() when debugMode is false (for when ACTIONS_STEP_DEBUG is set at workflow level)
      */
     debug(message) {
-        if (this.verbose) {
+        if (this.debugMode) {
             core.info(`[DEBUG] ${message}`);
         }
         else {
             core.debug(message);
         }
     }
+    /**
+     * Check if verbose logging is enabled
+     */
+    isVerbose() {
+        return this.verbose;
+    }
+    /**
+     * Check if debug mode is enabled
+     */
+    isDebug() {
+        return this.debugMode;
+    }
 }
 exports.Logger = Logger;
 /**
- * @deprecated Use `new Logger(verbose)` instead
+ * @deprecated Use `new Logger(verbose, debugMode)` instead
  * Kept for backward compatibility
  */
 function createLogger(verbose) {
