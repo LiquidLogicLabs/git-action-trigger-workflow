@@ -4,6 +4,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow || 'E2E Tests' }}-${{ github.ref || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   actions: write
@@ -11,46 +15,30 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    # Run action from committed dist first (no build). Ensures E2E fails if dist is unbundled.
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Smoke test - action runs from committed dist
+      - name: Smoke test - action runs from committed dist (current repo)
         uses: ./
         with:
           workflow-name: 'CI'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Dispatch workflow on test repo (GitHub)
+        if: vars.TEST_GITHUB_REPO != ''
+        uses: ./
         with:
-          node-version: '20'
-          cache: 'npm'
+          repo: ${{ vars.TEST_GITHUB_REPO }}
+          workflow-name: ${{ vars.TEST_GITHUB_WORKFLOW || 'E2E Trigger Test' }}
+          ref: ${{ vars.TEST_GITHUB_REF || 'main' }}
+          token: ${{ secrets.TEST_GITHUB_TOKEN }}
 
-      - name: Configure npm auth for package registry
-        run: echo "//git.ravenwolf.org/api/packages/liquidlogiclabs/npm/:_authToken=${NPM_REGISTRY_TOKEN}" >> .npmrc
-        env:
-          NPM_REGISTRY_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Run E2E tests
-        env:
-          TEST_GITHUB_TOKEN: ${{ secrets.TEST_GITHUB_TOKEN }}
-          TEST_GITHUB_REPO: ${{ vars.TEST_GITHUB_REPO }}
-          TEST_GITHUB_SERVER_URL: ${{ vars.TEST_GITHUB_SERVER_URL || 'https://github.com' }}
-          TEST_GITHUB_API_URL: ${{ vars.TEST_GITHUB_API_URL || 'https://api.github.com' }}
-          TEST_GITHUB_WORKFLOW: ${{ vars.TEST_GITHUB_WORKFLOW }}
-          TEST_GITHUB_REF: ${{ vars.TEST_GITHUB_REF || 'main' }}
-          TEST_GITEA_TOKEN: ${{ secrets.TEST_GITEA_TOKEN }}
-          TEST_GITEA_REPO: ${{ vars.TEST_GITEA_REPO }}
-          TEST_GITEA_URL: ${{ vars.TEST_GITEA_URL }}
-          TEST_GITEA_WORKFLOW: ${{ vars.TEST_GITEA_WORKFLOW }}
-          TEST_GITEA_REF: ${{ vars.TEST_GITEA_REF || 'main' }}
-        run: npm run test:e2e
-
+      - name: Dispatch workflow on test repo (Gitea)
+        if: vars.TEST_GITEA_REPO != ''
+        uses: ./
+        with:
+          repo: ${{ vars.TEST_GITEA_REPO }}
+          workflow-name: ${{ vars.TEST_GITEA_WORKFLOW || 'E2E Trigger Test' }}
+          ref: ${{ vars.TEST_GITEA_REF || 'main' }}
+          token: ${{ secrets.TEST_GITEA_TOKEN }}

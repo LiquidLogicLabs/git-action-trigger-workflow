@@ -24,7 +24,7 @@ body:
       description: What are you trying to accomplish? Share your workflow YAML (remove sensitive info)
       render: yaml
       placeholder: |
-        - uses: LiquidLogicLabs/gitea-action-trigger-workflow@v1
+        - uses: LiquidLogicLabs/git-action-trigger-workflow@v2
           with:
             workflow_name: Deploy
     validations:

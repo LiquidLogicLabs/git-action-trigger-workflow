@@ -42,7 +42,7 @@ body:
       description: How would you use this feature? Show example YAML if applicable
       render: yaml
       placeholder: |
-        - uses: LiquidLogicLabs/gitea-action-trigger-workflow@v1
+        - uses: LiquidLogicLabs/git-action-trigger-workflow@v2
           with:
             workflow_name: Deploy
             new-feature: value

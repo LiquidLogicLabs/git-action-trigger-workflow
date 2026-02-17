@@ -9,20 +9,18 @@ const workflowName = process.env.TEST_GITEA_WORKFLOW;
 const ref = process.env.TEST_GITEA_REF || 'main';
 
 const logger = new Logger(false);
-const shouldRun = !!token && !!repo && !!serverUrl;
-const describeFn = shouldRun ? describe : describe.skip;
 
-describeFn('gitea e2e', () => {
-  if (!shouldRun) {
-    test.skip('skipped - missing TEST_GITEA_TOKEN/TEST_GITEA_REPO/TEST_GITEA_URL', () => undefined);
-    return;
-  }
-
+describe('gitea e2e', () => {
   const [owner, repoName] = (repo || '').split('/');
-  if (!owner || !repoName) {
-    test.skip('skipped - TEST_GITEA_REPO must be owner/repo', () => undefined);
-    return;
-  }
+
+  beforeAll(() => {
+    if (!token || !repo || !serverUrl) {
+      throw new Error('TEST_GITEA_TOKEN, TEST_GITEA_REPO, and TEST_GITEA_URL required for e2e');
+    }
+    if (!owner || !repoName) {
+      throw new Error('TEST_GITEA_REPO must be owner/repo');
+    }
+  });
 
   const http = createHttpClient({
     baseUrl: serverUrl!,
@@ -50,7 +48,7 @@ describeFn('gitea e2e', () => {
 
   test('dispatches workflow when name provided', async () => {
     if (!workflowName) {
-      return;
+      throw new Error('TEST_GITEA_WORKFLOW required for dispatch test');
     }
     const { workflows } = await client.listWorkflows();
     const wf = workflows.find((w) => w.name === workflowName || w.path?.includes(workflowName));

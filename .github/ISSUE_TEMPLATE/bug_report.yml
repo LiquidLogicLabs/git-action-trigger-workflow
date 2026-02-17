@@ -55,7 +55,7 @@ body:
       render: yaml
       placeholder: |
         - name: Trigger workflow
-          uses: LiquidLogicLabs/gitea-action-trigger-workflow@v1
+          uses: LiquidLogicLabs/git-action-trigger-workflow@v2
           with:
             workflow_name: Deploy
     validations:

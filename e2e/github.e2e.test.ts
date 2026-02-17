@@ -1,9 +1,14 @@
+/**
+ * GitHub E2E tests for trigger-workflow.
+ * Requires GITHUB_TOKEN or TEST_GITHUB_TOKEN; uses TEST_GITHUB_REPO (default: LiquidLogicLabs/git-action-release-tests).
+ * For dispatch test, set TEST_GITHUB_WORKFLOW="E2E Trigger Test" (workflow in test repo).
+ */
 import { createGithubClient } from '../src/platforms/github';
 import { createHttpClient } from '../src/http/client';
 import { Logger } from '../src/logger';
 
-const token = process.env.TEST_GITHUB_TOKEN;
-const repo = process.env.TEST_GITHUB_REPO; // owner/repo
+const token = process.env.TEST_GITHUB_TOKEN || process.env.GITHUB_TOKEN;
+const repo = process.env.TEST_GITHUB_REPO || 'LiquidLogicLabs/git-action-release-tests';
 const serverUrl = process.env.TEST_GITHUB_SERVER_URL || 'https://github.com';
 const apiUrl = process.env.TEST_GITHUB_API_URL || 'https://api.github.com';
 const workflowName = process.env.TEST_GITHUB_WORKFLOW;
@@ -11,21 +16,17 @@ const ref = process.env.TEST_GITHUB_REF || 'main';
 
 const logger = new Logger(false);
 
-const shouldRun = !!token && !!repo;
-
-const describeFn = shouldRun ? describe : describe.skip;
-
-describeFn('github e2e', () => {
-  if (!shouldRun) {
-    test.skip('skipped - missing TEST_GITHUB_TOKEN/TEST_GITHUB_REPO', () => undefined);
-    return;
-  }
-
+describe('github e2e', () => {
   const [owner, repoName] = (repo || '').split('/');
-  if (!owner || !repoName) {
-    test.skip('skipped - TEST_GITHUB_REPO must be owner/repo', () => undefined);
-    return;
-  }
+
+  beforeAll(() => {
+    if (!token) {
+      throw new Error('GITHUB_TOKEN or TEST_GITHUB_TOKEN required for e2e');
+    }
+    if (!owner || !repoName) {
+      throw new Error('TEST_GITHUB_REPO must be owner/repo');
+    }
+  });
 
   const http = createHttpClient({
     baseUrl: apiUrl,
@@ -53,7 +54,7 @@ describeFn('github e2e', () => {
 
   test('dispatches workflow when name provided', async () => {
     if (!workflowName) {
-      return;
+      throw new Error('TEST_GITHUB_WORKFLOW required (e.g. "E2E Trigger Test")');
     }
     const { workflows } = await client.listWorkflows();
     const wf = workflows.find((w) => w.name === workflowName || w.path?.includes(workflowName));
