@@ -46,6 +46,9 @@ async function run(): Promise<void> {
 
   const result = await client.dispatchWorkflow(wf, cfg.ref, cfg.inputs);
   log.info(`Dispatch request accepted (${result.status}).`);
+
+  core.setOutput('status', String(result.status));
+  core.setOutput('endpoint', result.endpoint);
 }
 
 run().catch((err) => {

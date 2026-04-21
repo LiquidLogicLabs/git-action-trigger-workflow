@@ -21,7 +21,6 @@ inputs:
       Example: if your workflow has `name: CI/CD Pipeline`, use `workflow-name: CI/CD Pipeline`.
       Example: if your workflow file is `build.yml` with no name field, use `workflow-name: build`.
     required: true
-    deprecationMessage: 'Use workflow-name instead of workflowName'
   ref:
     description: Git ref to run the workflow on (branch/tag/SHA).
     required: false
@@ -32,7 +31,6 @@ inputs:
       Auto-inferred from repo URL or runner env (GITHUB_SERVER_URL / GITEA_SERVER_URL).
       Override if inference is incorrect.
     required: false
-    deprecationMessage: 'Use base-url instead of baseUrl'
   token:
     description: >
       API token for the target instance (GitHub or Gitea). If omitted, falls back to runner environment token (GITHUB_TOKEN or GITEA_TOKEN).
@@ -45,11 +43,16 @@ inputs:
     description: Skip TLS certificate verification for API calls (self-hosted instances).
     required: false
     default: "false"
-    deprecationMessage: 'Use skip-certificate-check instead of skipCertificateCheck'
   verbose:
     description: Enable verbose logging (HTTP attempts, endpoint discovery, response snippets). Also enabled when ACTIONS_STEP_DEBUG=true.
     required: false
     default: "false"
+
+outputs:
+  status:
+    description: HTTP status code returned by the dispatch request (typically 204 on GitHub, 201/204 on Gitea).
+  endpoint:
+    description: The API endpoint URL used to dispatch the workflow. Useful for debugging platform/instance routing.
 
 runs:
   using: 'node24'
