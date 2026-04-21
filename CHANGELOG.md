@@ -1,3 +1,17 @@
+## [2.0.2](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.1...v2.0.2) (2026-04-21)
+
+
+### Bug Fixes
+
+* correct action runtime to node24 ([fd7b063](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/commit/fd7b063d5ce5875fe4b567df09bed6e70d5ac8a1))
+
+
+### Features
+
+* remove misapplied deprecationMessages, add status/endpoint outputs, bump @actions/core to v2 ([86bd29c](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/commit/86bd29c34de7c98c948da4b3be50484b29edfe4b))
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
