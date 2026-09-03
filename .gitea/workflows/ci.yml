@@ -17,14 +17,13 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-
-      - name: Configure npm auth for package registry
-        run: echo "//git.ravenwolf.org/api/packages/liquidlogiclabs/npm/:_authToken=${NPM_REGISTRY_TOKEN}" >> .npmrc
-        env:
-          NPM_REGISTRY_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}
+          registry-url: "https://git.ravenwolf.org/api/packages/liquidlogiclabs/npm/"
+          scope: "@liquidlogiclabs"
 
       - name: Install
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}
 
       - name: Build
         run: npm run build
