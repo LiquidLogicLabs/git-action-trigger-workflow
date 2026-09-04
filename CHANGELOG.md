@@ -1,3 +1,13 @@
+## [2.0.4](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.3...v2.0.4) (2026-09-04)
+
+
+### Bug Fixes
+
+* encode every value interpolated into an API URL path ([6cd5f24](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/commit/6cd5f243f134580bc9d3b0d51c3d27a7dba6b9dc))
+* **lint:** add lint:fix matching the existing lint glob ([c561b7a](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/commit/c561b7af41bde3d9752285277ccf85a651c69a2d))
+
+
+
 ## [2.0.3](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.2...v2.0.3) (2026-07-05)
 
 
