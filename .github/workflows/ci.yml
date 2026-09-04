@@ -23,6 +23,12 @@ on:
       - '.github/pull_request_template.md'
       - '.devcontainer.disabled/**'
   workflow_call:  # Allow CI to be called by release workflow (always runs)
+    secrets:
+      NPM_REGISTRY_TOKEN:
+        # Declared so a caller can pass it explicitly. Without this declaration GitHub
+        # rejects `secrets: {NPM_REGISTRY_TOKEN: ...}` at parse time, which is why
+        # `secrets: inherit` was used -- it works without a declaration.
+        required: false
   workflow_dispatch:  # Allow manual triggering (always runs)
 
 concurrency:
@@ -43,15 +49,33 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          # No step in this job pushes; the credential is not needed.
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        # registry-url makes setup-node write the auth .npmrc to RUNNER_TEMP, not the
+        # workspace. Never append a token to a workspace .npmrc: act bind-mounts the
+        # repo directory and never truncates it, which is how a live token reached a
+        # public repo. Auth is supplied per-step via NODE_AUTH_TOKEN.
+        #
+        # scope is REQUIRED even though git-platform-detector is unscoped. Without it
+        # setup-node writes a bare `registry=<gitea>` line, making Gitea the DEFAULT
+        # registry; npm then rewrites every public package's resolved URL to that host
+        # and `npm ci` dies with 404s. With scope it writes
+        # `@liquidlogiclabs:registry=<gitea>` instead, leaving the default registry as
+        # npmjs. The private dep is a raw HTTPS tarball, so it needs no scope routing --
+        # only the host-scoped `//git.ravenwolf.org/...:_authToken` line, which npm
+        # applies to a direct tarball fetch on that host.
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
-          cache: 'npm'
+          # setup-node enables package-manager caching by default; a cache
+          # restored from a PR run must not reach a publishing job. Removing
+          # `cache: 'npm'` alone is NOT enough -- the default still caches.
+          package-manager-cache: false
           registry-url: 'https://git.ravenwolf.org/api/packages/liquidlogiclabs/npm/'
           scope: '@liquidlogiclabs'
 
@@ -89,11 +113,35 @@ jobs:
           fi
           echo "No duplicate forge workflow directories."
       - name: Lint workflows
-        # Scoped to ci.yml in Phase 0; Phase 1 fixes release.yml/e2e-tests.yml
-        # shellcheck findings and removes the scoping.
         uses: docker://rhysd/actionlint:1.7.12
         with:
-          args: -color .github/workflows/ci.yml
+          # No path: actionlint discovers every workflow itself. Passing a directory makes
+          # it fail with "is a directory" and exit 0, having linted nothing -- and passing
+          # one file, as this did, left release.yml, test.yml and e2e-tests.yml unchecked,
+          # which is where nearly all the shell actually lives.
+          args: -color
+
+      - name: Audit workflows for injection and supply-chain issues
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/zizmorcore/zizmor:1.30.0 \
+            --no-progress --persona=regular /repo
+
+      - name: Reject a suppressed template-injection finding
+        run: |
+          # template-injection is the remote-code-execution class this gate exists for. It
+          # may never be suppressed -- neither inline nor through a config file that a
+          # reviewer scanning workflow diffs would not see.
+          if grep -rn 'zizmor: ignore\[template-injection\]' .github action.yml 2>/dev/null; then
+            echo "::error::template-injection may not be suppressed; fix it or report blocked"
+            exit 1
+          fi
+          for cfg in .github/zizmor.yml .github/zizmor.yaml zizmor.yml .zizmor.yml; do
+            if [ -e "$cfg" ]; then
+              echo "::error::$cfg would let findings be silenced outside the workflow diff"
+              exit 1
+            fi
+          done
+          echo "No suppressed template-injection findings and no zizmor config."
 
       - name: Scan for secrets
         run: |
@@ -112,8 +160,13 @@ jobs:
   test:
     # No conditions needed - workflow trigger handles filtering
     needs: lint  # Tests run after lint
-    uses: ./.github/workflows/test.yml
-    secrets: inherit
+    # `$/` is GitHub syntax from July 2026 and act 0.2.89 rejects it outright ("must start
+    # with './' if it's a local workflow"), which would break every `npm run test:act:*`
+    # script here. The marker must sit ON the uses: line -- a comment above a JOB-level
+    # uses: is not honoured, unlike the step-level case.
+    uses: ./.github/workflows/test.yml  # zizmor: ignore[self-repository]
+    secrets:
+      NPM_REGISTRY_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}
     # test.yml runs: unit tests + integration tests (all tests except E2E)
     # Note: E2E tests run in release workflow, not CI
 
