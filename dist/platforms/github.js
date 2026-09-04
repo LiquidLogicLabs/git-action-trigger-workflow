@@ -2,11 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createGithubClient = createGithubClient;
 exports.findWorkflowForGithub = findWorkflowForGithub;
+const url_1 = require("../utils/url");
 const workflows_1 = require("../utils/workflows");
 function buildListCandidates(owner, repo) {
     return [
-        `/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-        `/repos/${owner}/${repo}/actions/workflows`,
+        `/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows?per_page=100`,
+        `/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows`,
     ];
 }
 async function listWorkflowsInternal(opts) {
@@ -35,11 +36,10 @@ function buildDispatchEndpoints(owner, repo, workflow) {
     const endpoints = [];
     const pathOrName = workflow.path || workflow.file || workflow.name;
     if (workflow.id != null) {
-        endpoints.push(`/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatches`);
+        endpoints.push(`/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.id, 'workflow id')}/dispatches`);
     }
     if (pathOrName) {
-        const enc = encodeURIComponent(pathOrName);
-        endpoints.push(`/repos/${owner}/${repo}/actions/workflows/${enc}/dispatches`);
+        endpoints.push(`/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(pathOrName, 'workflow file')}/dispatches`);
     }
     return endpoints;
 }

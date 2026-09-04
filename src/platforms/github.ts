@@ -1,12 +1,13 @@
 import { HttpClient } from '../http/client';
 import { Logger } from '../logger';
+import { safeSegment } from '../utils/url';
 import { extractWorkflows, findWorkflowByName } from '../utils/workflows';
 import { DispatchResult, PlatformClient, PlatformContext, WorkflowListResult, WorkflowSummary } from './types';
 
 function buildListCandidates(owner: string, repo: string) {
   return [
-    `/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-    `/repos/${owner}/${repo}/actions/workflows`,
+    `/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows?per_page=100`,
+    `/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows`,
   ];
 }
 
@@ -47,12 +48,13 @@ function buildDispatchEndpoints(owner: string, repo: string, workflow: WorkflowS
   const pathOrName = workflow.path || workflow.file || workflow.name;
 
   if (workflow.id != null) {
-    endpoints.push(`/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatches`);
+    endpoints.push(`/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(workflow.id as string | number, 'workflow id')}/dispatches`);
   }
 
   if (pathOrName) {
-    const enc = encodeURIComponent(pathOrName);
-    endpoints.push(`/repos/${owner}/${repo}/actions/workflows/${enc}/dispatches`);
+    endpoints.push(
+      `/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(pathOrName, 'workflow file')}/dispatches`,
+    );
   }
 
   return endpoints;

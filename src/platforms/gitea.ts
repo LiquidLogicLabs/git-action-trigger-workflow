@@ -1,13 +1,14 @@
 import { HttpClient } from '../http/client';
 import { Logger } from '../logger';
+import { safeSegment } from '../utils/url';
 import { extractWorkflows, findWorkflowByName } from '../utils/workflows';
 import { DispatchResult, PlatformClient, PlatformContext, WorkflowListResult, WorkflowSummary } from './types';
 
 function buildCandidates(owner: string, repo: string) {
   return [
-    `/api/v1/repos/${owner}/${repo}/actions/workflows`,
-    `/api/v1/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-    `/api/v1/repos/${owner}/${repo}/actions/workflows?limit=100`,
+    `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows`,
+    `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows?per_page=100`,
+    `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows?limit=100`,
   ];
 }
 
@@ -49,24 +50,22 @@ function buildDispatchCandidates(owner: string, repo: string, workflow: Workflow
   const dispatchCandidates: string[] = [];
   if (workflow.id != null) {
     dispatchCandidates.push(
-      `/api/v1/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatches`,
-      `/api/v1/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatch`,
+      `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(workflow.id as string | number, 'workflow id')}/dispatches`,
+      `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(workflow.id as string | number, 'workflow id')}/dispatch`,
     );
   }
 
   const file = workflow.path || workflow.file;
   if (file) {
-    const enc = encodeURIComponent(file);
     dispatchCandidates.push(
-      `/api/v1/repos/${owner}/${repo}/actions/workflows/${enc}/dispatches`,
-      `/api/v1/repos/${owner}/${repo}/actions/workflows/${enc}/dispatch`,
+      `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(file, 'workflow file')}/dispatches`,
+      `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(file, 'workflow file')}/dispatch`,
     );
   }
 
-  const nameEnc = encodeURIComponent(workflow.name);
   dispatchCandidates.push(
-    `/api/v1/repos/${owner}/${repo}/actions/workflows/${nameEnc}/dispatches`,
-    `/api/v1/repos/${owner}/${repo}/actions/workflows/${nameEnc}/dispatch`,
+    `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(workflow.name, 'workflow name')}/dispatches`,
+    `/api/v1/repos/${safeSegment(owner, 'owner')}/${safeSegment(repo, 'repository name')}/actions/workflows/${safeSegment(workflow.name, 'workflow name')}/dispatch`,
   );
 
   return dispatchCandidates;

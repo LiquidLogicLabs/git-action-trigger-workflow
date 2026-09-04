@@ -32342,12 +32342,13 @@ function createLogger(verbose) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createGiteaClient = createGiteaClient;
 exports.findWorkflowForGitea = findWorkflowForGitea;
+const url_1 = __nccwpck_require__(5096);
 const workflows_1 = __nccwpck_require__(163);
 function buildCandidates(owner, repo) {
     return [
-        `/api/v1/repos/${owner}/${repo}/actions/workflows`,
-        `/api/v1/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-        `/api/v1/repos/${owner}/${repo}/actions/workflows?limit=100`,
+        `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows`,
+        `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows?per_page=100`,
+        `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows?limit=100`,
     ];
 }
 async function listWorkflowsInternal(opts) {
@@ -32377,15 +32378,13 @@ async function listWorkflowsInternal(opts) {
 function buildDispatchCandidates(owner, repo, workflow) {
     const dispatchCandidates = [];
     if (workflow.id != null) {
-        dispatchCandidates.push(`/api/v1/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatches`, `/api/v1/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatch`);
+        dispatchCandidates.push(`/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.id, 'workflow id')}/dispatches`, `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.id, 'workflow id')}/dispatch`);
     }
     const file = workflow.path || workflow.file;
     if (file) {
-        const enc = encodeURIComponent(file);
-        dispatchCandidates.push(`/api/v1/repos/${owner}/${repo}/actions/workflows/${enc}/dispatches`, `/api/v1/repos/${owner}/${repo}/actions/workflows/${enc}/dispatch`);
+        dispatchCandidates.push(`/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(file, 'workflow file')}/dispatches`, `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(file, 'workflow file')}/dispatch`);
     }
-    const nameEnc = encodeURIComponent(workflow.name);
-    dispatchCandidates.push(`/api/v1/repos/${owner}/${repo}/actions/workflows/${nameEnc}/dispatches`, `/api/v1/repos/${owner}/${repo}/actions/workflows/${nameEnc}/dispatch`);
+    dispatchCandidates.push(`/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.name, 'workflow name')}/dispatches`, `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.name, 'workflow name')}/dispatch`);
     return dispatchCandidates;
 }
 async function dispatchWorkflowInternal(opts) {
@@ -32444,11 +32443,12 @@ function findWorkflowForGitea(workflows, workflowName) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createGithubClient = createGithubClient;
 exports.findWorkflowForGithub = findWorkflowForGithub;
+const url_1 = __nccwpck_require__(5096);
 const workflows_1 = __nccwpck_require__(163);
 function buildListCandidates(owner, repo) {
     return [
-        `/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-        `/repos/${owner}/${repo}/actions/workflows`,
+        `/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows?per_page=100`,
+        `/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows`,
     ];
 }
 async function listWorkflowsInternal(opts) {
@@ -32477,11 +32477,10 @@ function buildDispatchEndpoints(owner, repo, workflow) {
     const endpoints = [];
     const pathOrName = workflow.path || workflow.file || workflow.name;
     if (workflow.id != null) {
-        endpoints.push(`/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatches`);
+        endpoints.push(`/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.id, 'workflow id')}/dispatches`);
     }
     if (pathOrName) {
-        const enc = encodeURIComponent(pathOrName);
-        endpoints.push(`/repos/${owner}/${repo}/actions/workflows/${enc}/dispatches`);
+        endpoints.push(`/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(pathOrName, 'workflow file')}/dispatches`);
     }
     return endpoints;
 }
@@ -32550,6 +32549,46 @@ function createPlatformClient(platform, ctx) {
         default:
             throw new Error(`Unsupported platform: ${platform}`);
     }
+}
+
+
+/***/ }),
+
+/***/ 5096:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.safeSegment = safeSegment;
+/**
+ * Encode a value for use as a single path segment in an API URL.
+ *
+ * Interpolating a value straight into a path lets it redirect the request. Verified against
+ * WHATWG URL resolution, which is what this action's transport applies — src/http/client.ts
+ * builds every request as `new URL(path, baseUrl)`:
+ *
+ *   owner = "../../.."  ->  /api/v1/repos/../../../r/actions/workflows  =>  /r/actions/workflows
+ *   id    = ".."        ->  /repos/o/r/actions/workflows/../dispatches  =>  /repos/o/r/actions/dispatches
+ *
+ * Dispatch is a POST, so a redirected request posts to an endpoint the caller never named.
+ *
+ * Every interpolated value is attacker-influenceable: owner and repo are parsed from the
+ * `repo` input (or GITEA_REPOSITORY / GITHUB_REPOSITORY), and the workflow id, path, file
+ * and name all come back in the list endpoint's response body, which is validated only far
+ * enough to confirm a name/path/file is present.
+ *
+ * encodeURIComponent is necessary but not sufficient: it does not encode dots, so a bare
+ * "." or ".." survives it unchanged and is then removed by dot-segment normalisation. Those
+ * two are refused outright rather than encoded, because no legitimate owner, repo, workflow
+ * id or workflow file is named "." or "..".
+ */
+function safeSegment(value, label) {
+    const s = String(value);
+    if (s === '.' || s === '..') {
+        throw new Error(`Refusing to use ${JSON.stringify(s)} as a ${label}: it would redirect the request to a different endpoint.`);
+    }
+    return encodeURIComponent(s);
 }
 
 

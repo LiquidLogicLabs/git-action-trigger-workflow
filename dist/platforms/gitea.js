@@ -2,12 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createGiteaClient = createGiteaClient;
 exports.findWorkflowForGitea = findWorkflowForGitea;
+const url_1 = require("../utils/url");
 const workflows_1 = require("../utils/workflows");
 function buildCandidates(owner, repo) {
     return [
-        `/api/v1/repos/${owner}/${repo}/actions/workflows`,
-        `/api/v1/repos/${owner}/${repo}/actions/workflows?per_page=100`,
-        `/api/v1/repos/${owner}/${repo}/actions/workflows?limit=100`,
+        `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows`,
+        `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows?per_page=100`,
+        `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows?limit=100`,
     ];
 }
 async function listWorkflowsInternal(opts) {
@@ -37,15 +38,13 @@ async function listWorkflowsInternal(opts) {
 function buildDispatchCandidates(owner, repo, workflow) {
     const dispatchCandidates = [];
     if (workflow.id != null) {
-        dispatchCandidates.push(`/api/v1/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatches`, `/api/v1/repos/${owner}/${repo}/actions/workflows/${workflow.id}/dispatch`);
+        dispatchCandidates.push(`/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.id, 'workflow id')}/dispatches`, `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.id, 'workflow id')}/dispatch`);
     }
     const file = workflow.path || workflow.file;
     if (file) {
-        const enc = encodeURIComponent(file);
-        dispatchCandidates.push(`/api/v1/repos/${owner}/${repo}/actions/workflows/${enc}/dispatches`, `/api/v1/repos/${owner}/${repo}/actions/workflows/${enc}/dispatch`);
+        dispatchCandidates.push(`/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(file, 'workflow file')}/dispatches`, `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(file, 'workflow file')}/dispatch`);
     }
-    const nameEnc = encodeURIComponent(workflow.name);
-    dispatchCandidates.push(`/api/v1/repos/${owner}/${repo}/actions/workflows/${nameEnc}/dispatches`, `/api/v1/repos/${owner}/${repo}/actions/workflows/${nameEnc}/dispatch`);
+    dispatchCandidates.push(`/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.name, 'workflow name')}/dispatches`, `/api/v1/repos/${(0, url_1.safeSegment)(owner, 'owner')}/${(0, url_1.safeSegment)(repo, 'repository name')}/actions/workflows/${(0, url_1.safeSegment)(workflow.name, 'workflow name')}/dispatch`);
     return dispatchCandidates;
 }
 async function dispatchWorkflowInternal(opts) {
