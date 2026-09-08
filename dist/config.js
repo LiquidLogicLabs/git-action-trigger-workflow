@@ -37,7 +37,7 @@ exports.__internal = void 0;
 exports.parseRepoTarget = parseRepoTarget;
 exports.readConfig = readConfig;
 const core = __importStar(require("@actions/core"));
-const git_platform_detector_1 = require("git-platform-detector");
+const git_platform_detector_1 = require("@liquidlogiclabs/git-platform-detector");
 function parseBool(v, defaultValue) {
     if (v == null || v === '')
         return defaultValue;

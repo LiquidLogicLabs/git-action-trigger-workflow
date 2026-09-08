@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { PlatformId } from './platforms/types';
-import { detectPlatform as detectSharedPlatform, getBuiltInProviders } from 'git-platform-detector';
+import { detectPlatform as detectSharedPlatform, getBuiltInProviders } from '@liquidlogiclabs/git-platform-detector';
 
 export type RepoTarget = {
   owner: string;

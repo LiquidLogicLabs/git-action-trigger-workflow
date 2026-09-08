@@ -2,12 +2,6 @@ name: Test
 
 on:
   workflow_call:  # Called by CI workflow
-    secrets:
-      NPM_REGISTRY_TOKEN:
-        # Declared so a caller can pass it explicitly. Without this declaration GitHub
-        # rejects `secrets: {NPM_REGISTRY_TOKEN: ...}` at parse time, which is why
-        # `secrets: inherit` was used -- it works without a declaration.
-        required: false
   workflow_dispatch:  # Allow manual triggering
 
 concurrency:
@@ -39,13 +33,9 @@ jobs:
           # restored from a PR run must not reach a publishing job. Removing
           # `cache: 'npm'` alone is NOT enough -- the default still caches.
           package-manager-cache: false
-          registry-url: 'https://git.ravenwolf.org/api/packages/liquidlogiclabs/npm/'
-          scope: '@liquidlogiclabs'
 
       - name: Install dependencies
         run: npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_REGISTRY_TOKEN }}
 
       - name: Verify Jest is installed
         run: npx jest --version
