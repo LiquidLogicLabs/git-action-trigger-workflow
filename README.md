@@ -1,4 +1,4 @@
-# Trigger remote workflow (GitHub/Gitea)
+# Git Trigger Remote Workflow
 
 [![GitHub release](https://img.shields.io/github/v/release/LiquidLogicLabs/git-action-trigger-workflow?sort=semver)](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/releases)
 [![GitHub Marketplace](https://img.shields.io/badge/marketplace-git--action--trigger--workflow-blue?logo=github)](https://github.com/marketplace/actions/git-action-trigger-workflow)
@@ -19,7 +19,7 @@ A GitHub Action that triggers a workflow in another repository hosted on **Gitea
 
 ```yaml
 - name: Trigger remote workflow
-  uses: LiquidLogicLabs/git-action-trigger-workflow@v1
+  uses: LiquidLogicLabs/git-action-trigger-workflow@v2
   with:
     workflow-name: Deploy
 ```
@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deploy workflow
-        uses: LiquidLogicLabs/git-action-trigger-workflow@v1
+        uses: LiquidLogicLabs/git-action-trigger-workflow@v2
         with:
           workflow-name: Deploy
 ```
@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger build workflow
-        uses: LiquidLogicLabs/git-action-trigger-workflow@v1
+        uses: LiquidLogicLabs/git-action-trigger-workflow@v2
         with:
           repo: other-owner/other-repo
           workflow-name: Build
@@ -139,7 +139,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger remote workflow
-        uses: LiquidLogicLabs/git-action-trigger-workflow@v1
+        uses: LiquidLogicLabs/git-action-trigger-workflow@v2
         with:
           repo: https://gitea.other.example.com/other-owner/other-repo
           workflow-name: Build
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger GitHub workflow
-        uses: LiquidLogicLabs/git-action-trigger-workflow@v1
+        uses: LiquidLogicLabs/git-action-trigger-workflow@v2
         with:
           repo: owner/repo
           workflow-name: CI
@@ -172,7 +172,7 @@ jobs:
 
 ```yaml
 - name: Trigger workflow with inputs
-  uses: LiquidLogicLabs/git-action-trigger-workflow@v1
+  uses: LiquidLogicLabs/git-action-trigger-workflow@v2
   with:
     workflow-name: Deploy
     inputs: |
@@ -255,13 +255,13 @@ This action does not produce outputs. It triggers a workflow and reports success
 This action uses semantic versioning. It's recommended to pin to a major version:
 
 ```yaml
-uses: LiquidLogicLabs/git-action-trigger-workflow@v1  # Recommended
+uses: LiquidLogicLabs/git-action-trigger-workflow@v2  # Recommended
 ```
 
 Or pin to a specific version:
 
 ```yaml
-uses: LiquidLogicLabs/git-action-trigger-workflow@v1.2.3  # Specific version (pick a tag from Releases)
+uses: LiquidLogicLabs/git-action-trigger-workflow@v2  # Specific version (pick a tag from Releases)
 ```
 
 ## Documentation
