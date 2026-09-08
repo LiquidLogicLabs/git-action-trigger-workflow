@@ -1,4 +1,4 @@
-name: Trigger remote workflow (GitHub/Gitea)
+name: 'Git Trigger Remote Workflow'
 description: Trigger a workflow in another repository on GitHub or Gitea (same or different instance).
 author: ravenwolf.org
 branding:
