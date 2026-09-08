@@ -1,3 +1,4 @@
+## [2.0.7](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.6...v2.0.7) (2026-09-08)
 ## [2.0.6](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.5...v2.0.6) (2026-09-08)
 
 
