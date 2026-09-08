@@ -1,3 +1,9 @@
+## [2.0.6](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.5...v2.0.6) (2026-09-08)
+
+
+### Features
+
+* consume @liquidlogiclabs/git-platform-detector from npmjs ([8daeea8](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/commit/8daeea8ba4e3002207063428d8d7c619af017852))
 ## [2.0.5](https://github.com/LiquidLogicLabs/git-action-trigger-workflow/compare/v2.0.4...v2.0.5) (2026-09-04)
 
 
